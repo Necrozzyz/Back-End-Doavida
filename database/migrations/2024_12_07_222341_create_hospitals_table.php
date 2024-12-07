@@ -8,7 +8,7 @@ class CreateHospitalsTable extends Migration
 {
     public function up()
     {
-        Schema::create('hospitais', function (Blueprint $table) {
+        Schema::create('hospitals', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('location');
@@ -18,6 +18,6 @@ class CreateHospitalsTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('hospitais');
+        Schema::dropIfExists('hospitals');
     }
 }

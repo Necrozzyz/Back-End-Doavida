@@ -8,19 +8,19 @@ class CreateOrgansTable extends Migration
 {
     public function up()
     {
-        Schema::create('orgaos', function (Blueprint $table) {
+        Schema::create('organs', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('status'); // available ou waiting
             $table->unsignedBigInteger('hospital_id');
             $table->timestamps();
 
-            $table->foreign('hospital_id')->references('id')->on('hospitais')->onDelete('cascade');
+            $table->foreign('hospital_id')->references('id')->on('hospitals')->onDelete('cascade');
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('orgaos');
+        Schema::dropIfExists('organs');
     }
 }

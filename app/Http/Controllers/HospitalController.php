@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Controllers;
+
 use App\Models\Hospital;
 use Illuminate\Http\Request;
 
