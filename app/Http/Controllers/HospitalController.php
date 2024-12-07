@@ -21,4 +21,21 @@ class HospitalController extends Controller
 
         return response()->json($hospital, 201);
     }
+
+    public function destroy($id)
+    {
+        $hospital = Hospital::find($id);
+
+        if (!$hospital) {
+            return response()->json([
+                'message' => 'Hospital não encontrado'
+            ], 404);
+        }
+
+        $hospital->delete();
+
+        return response()->json([
+            'message' => 'Hospital excluído com sucesso'
+        ]);
+    }
 }

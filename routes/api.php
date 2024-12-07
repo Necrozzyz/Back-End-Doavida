@@ -3,6 +3,8 @@
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrganController;
 use App\Http\Controllers\HospitalController;
+use App\Http\Controllers\AuthController;
+
 
 // Rotas para usuários
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
@@ -15,9 +17,13 @@ Route::middleware('auth:sanctum')->post('/organs', [OrganController::class, 'sto
 // Rotas para hospitais
 Route::middleware('auth:sanctum')->get('/hospitals', [HospitalController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/hospitals', [HospitalController::class, 'store']);
+// Rota para deletar hospital
+Route::middleware('auth:sanctum')->delete('/hospitals/{id}', [HospitalController::class, 'destroy']);
 
 // Rota para autenticação de login
 Route::post('/login', [UserController::class, 'login']);
+// Rota para registro
+Route::post('/register', [AuthController::class, 'register']);
 
 // Rota para obter informações do usuário autenticado
 Route::middleware('auth:sanctum')->get('/user', [UserController::class, 'user']);
@@ -32,3 +38,5 @@ Route::middleware('auth:sanctum')->group(function () {
 // Rotas específicas
 Route::middleware('auth:sanctum')->get('/organs/waiting', [OrganController::class, 'waiting']);
 Route::middleware('auth:sanctum')->get('/organs/available', [OrganController::class, 'available']);
+
+

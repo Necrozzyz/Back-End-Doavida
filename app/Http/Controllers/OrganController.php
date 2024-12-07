@@ -9,7 +9,8 @@ class OrganController extends Controller
 {
     public function index()
     {
-        return response()->json(Organ::all());
+        $organs = Organ::all();
+        return response()->json($organs);
     }
 
     public function waiting()
