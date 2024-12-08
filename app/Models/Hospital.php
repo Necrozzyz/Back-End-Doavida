@@ -4,13 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hospital extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
-     * Campos permitidos para operações de mass assignment
+     * Nome da tabela no banco de dados (se necessário).
+     */
+    protected $table = 'hospitals'; // Opcional, caso a tabela siga a convenção, pode ser omitido.
+
+    /**
+     * Campos permitidos para operações de mass assignment.
      */
     protected $fillable = [
         'name',
@@ -26,7 +32,7 @@ class Hospital extends Model
     }
 
     /**
-     * Métodos personalizados podem ser adicionados aqui
+     * Verifica se o hospital possui algum órgão com um status específico.
      */
     public function hasOrganWithStatus($status)
     {
@@ -34,7 +40,7 @@ class Hospital extends Model
     }
 
     /**
-     * Validando dados diretamente pelo modelo (opcional).
+     * Regras de validação.
      */
     public function validate()
     {

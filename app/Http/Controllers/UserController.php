@@ -3,97 +3,140 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
     /**
-     * Realiza o login do usuário.
-     */
-    public function login(Request $request)
-    {
-        // Validar entradas
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-
-        // Tenta autenticar com as credenciais
-        if (Auth::attempt($request->only('email', 'password'))) {
-            $user = Auth::user();
-            $token = $user->createToken('authToken')->plainTextToken;
-
-            return response()->json([
-                'token' => $token,
-                'user' => $user
-            ], 200);
-        }
-
-        return response()->json(['message' => 'Credenciais inválidas'], 401);
-    }
-
-    /**
-     * Retorna informações do usuário autenticado.
-     */
-    public function user(Request $request)
-    {
-        if ($request->user()) {
-            return response()->json($request->user(), 200);
-        }
-
-        return response()->json(['error' => 'Usuário não autenticado'], 401);
-    }
-
-    /**
-     * Lista todos os usuários no banco de dados.
+     * List all users.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        try {
-            $users = User::all();
-            return response()->json($users, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao buscar usuários'], 500);
-        }
+        $users = User::with('role')->get(); // Carrega o relacionamento com roles
+
+        return response()->json([
+            'success' => true,
+            'data' => $users,
+        ], 200);
     }
 
     /**
-     * Cadastra um novo usuário no banco de dados.
+     * Create a new user in the database.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        // Validação dos dados
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|string|in:admin,receptor,doador',
+            'role_id' => 'required|exists:roles,id', // Valida se o role_id é válido
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-
-        try {
-            $user = User::create([
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'role' => $request->role,
-            ]);
-
             return response()->json([
-                'message' => 'Usuário criado com sucesso!',
-                'user' => $user
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao criar usuário'], 500);
+                'success' => false,
+                'message' => $validator->errors(),
+            ], 422);
         }
+
+        $user = User::create([
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $request->role_id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user->load('role'), // Retorna o usuário com a relação carregada
+        ], 201);
+    }
+
+    /**
+     * Get the currently authenticated user's details.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function user(Request $request)
+    {
+        $user = $request->user()->load('role'); // Carrega a role do usuário autenticado
+
+        return response()->json([
+            'success' => true,
+            'data' => $user,
+        ], 200);
+    }
+
+    /**
+     * Update a user's information.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|max:255|unique:users,email,' . $id,
+            'role_id' => 'sometimes|required|exists:roles,id', // Valida alterações de role_id
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+            ], 422);
+        }
+
+        $user->update($request->only(['username', 'email', 'role_id']));
+
+        return response()->json([
+            'success' => true,
+            'data' => $user->load('role'),
+        ], 200);
+    }
+
+    /**
+     * Delete a user.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully.',
+        ], 200);
     }
 }

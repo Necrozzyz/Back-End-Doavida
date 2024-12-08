@@ -9,67 +9,106 @@ use Illuminate\Support\Facades\Validator;
 class OrganController extends Controller
 {
     /**
-     * Listar todos os órgãos.
+     * List all organs.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        try {
-            return response()->json(Organ::all(), 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao buscar órgãos'], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => Organ::all(),
+        ], 200);
     }
 
     /**
-     * Listar todos os órgãos com status 'waiting'.
-     */
-    public function waiting()
-    {
-        try {
-            return response()->json(Organ::where('status', 'waiting')->get(), 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao buscar órgãos aguardando'], 500);
-        }
-    }
-
-    /**
-     * Listar todos os órgãos com status 'available'.
-     */
-    public function available()
-    {
-        try {
-            return response()->json(Organ::where('status', 'available')->get(), 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao buscar órgãos disponíveis'], 500);
-        }
-    }
-
-    /**
-     * Armazenar um novo órgão no banco de dados.
+     * Store a new organ in the database.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        // Validar dados de entrada
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'status' => 'required|string|in:waiting,available',
-            'hospital_id' => 'required|integer|exists:hospitals,id',
+            'type' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+            ], 422);
         }
 
-        try {
-            $organ = Organ::create([
-                'name' => $request->name,
-                'status' => $request->status,
-                'hospital_id' => $request->hospital_id,
-            ]);
+        $organ = Organ::create($request->only(['name', 'type']));
 
-            return response()->json($organ, 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro ao criar órgão'], 500);
+        return response()->json([
+            'success' => true,
+            'data' => $organ,
+        ], 201);
+    }
+
+    /**
+     * Update an existing organ.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        $organ = Organ::find($id);
+
+        if (!$organ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Organ not found.',
+            ], 404);
         }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'type' => 'sometimes|required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+            ], 422);
+        }
+
+        $organ->update($request->only(['name', 'type']));
+
+        return response()->json([
+            'success' => true,
+            'data' => $organ,
+        ], 200);
+    }
+
+    /**
+     * Delete an existing organ.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        $organ = Organ::find($id);
+
+        if (!$organ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Organ not found.',
+            ], 404);
+        }
+
+        $organ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Organ deleted successfully.',
+        ], 200);
     }
 }
