@@ -44,16 +44,16 @@ composer install
 ```
 
 ### 3. COnfigure o Banco de Dados
- **3.1 Crie um banco de dados no MySQL
+ **3.1 Crie um banco de dados no MySQL**
 ```sql
 CREATE DATABASE doaVida;
 ```
 
- **3.2 Copie as variáveis de ambiente para o seu ambiente local:
+ **3.2 Copie as variáveis de ambiente para o seu ambiente local:**
 ```bash
 cp .env.example .env
 ```
- **3.3 Edite o .env com as configurações corretas de conexão:
+ **3.3 Edite o .env com as configurações corretas de conexão:**
  ```plaintext
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -83,4 +83,4 @@ php artisan db:seed
 php artisan serve
 ```
 Acesse pelo navegador em:
-**http://localhost:8000
+**http://localhost:8000**
