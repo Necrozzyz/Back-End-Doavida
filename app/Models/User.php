@@ -10,6 +10,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    /**
+     * Campos permitidos para atribuição em massa
+     */
     protected $fillable = [
         'username',
         'email',
@@ -17,10 +20,16 @@ class User extends Authenticatable
         'role',
     ];
 
+    /**
+     * Campos a serem ocultos nos retornos de JSON
+     */
     protected $hidden = [
         'password',
     ];
 
+    /**
+     * Cast para garantir formatação correta dos campos
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];

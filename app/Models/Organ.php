@@ -15,6 +15,9 @@ class Organ extends Model
         'hospital_id',
     ];
 
+    /**
+     * Define o relacionamento entre Organ e Hospital.
+     */
     public function hospital()
     {
         return $this->belongsTo(Hospital::class);

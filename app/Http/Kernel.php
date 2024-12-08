@@ -27,12 +27,9 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        'auth.basic' => \App\Http\Middleware\AuthenticateWithBasicAuth::class,
-        'cache.headers' => \App\Http\Middleware\SetCacheHeaders::class,
-        'can' => \App\Http\Middleware\Authorize::class,
+        'auth.jwt' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class, // Middleware JWT
+        'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'password.confirm' => \App\Http\Middleware\RequirePassword::class,
         'throttle' => \App\Http\Middleware\ThrottleRequests::class,
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
     ];
@@ -44,6 +41,4 @@ class Kernel extends HttpKernel
     {
         parent::__construct();
     }
-
-    
 }
